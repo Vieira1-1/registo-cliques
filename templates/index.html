@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Registo de Cliques</title>
+</head>
+<body>
+  <h1>Registo de Cliques</h1>
+
+  <button onclick="send(1)">Botão 1</button>
+  <button onclick="send(2)">Botão 2</button>
+  <button onclick="send(3)">Botão 3</button>
+  <button onclick="send(4)">Botão 4</button>
+
+  <p id="out"></p>
+
+  <script>
+    async function send(b) {
+      const r = await fetch("/api/click", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({button: String(b)})
+      });
+      const d = await r.json();
+      document.getElementById("out").innerText =
+        `Seq: ${d.seq} | Data: ${d.date} | Hora: ${d.time}`;
+    }
+  </script>
+</body>
+</html>
