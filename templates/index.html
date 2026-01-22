@@ -20,7 +20,7 @@
     </div>
   </main>
 
-  <!-- MODAL (JANELA) -->
+  <!-- JANELA / MODAL -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <h2>Registo do Clique</h2>
@@ -51,10 +51,6 @@
       document.getElementById("mDate").textContent = d.date;
       document.getElementById("mTime").textContent = d.time;
 
-      openModal();
-    }
-
-    function openModal() {
       modal.classList.remove("hidden");
     }
 
@@ -62,7 +58,7 @@
       modal.classList.add("hidden");
     }
 
-    // fechar ao clicar fora
+    // fechar clicando fora
     modal.addEventListener("click", (e) => {
       if (e.target === modal) closeModal();
     });
