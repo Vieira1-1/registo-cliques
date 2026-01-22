@@ -11,6 +11,11 @@
   <main class="card">
     <h1>Registo de Cliques</h1>
     <p class="sub">Clica num botão para registar o clique.</p>
+    <section class="log">
+      <h3>Log de Cliques (sessão atual)</h3>
+      <ul id="logList"></ul>
+    </section>
+
 
     <div class="buttons">
       <button class="btn b1" onclick="send(1)">Botão 1</button>
@@ -34,40 +39,47 @@
     </div>
   </div>
 
-  <script>
-    const modal = document.getElementById("modal");
 
-    async function send(b) {
-      const r = await fetch("/api/click", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({button: String(b)})
+    <script>
+      const modal = document.getElementById("modal");
+      const logList = document.getElementById("logList");
+
+      async function send(b) {
+        const r = await fetch("/api/click", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({button: String(b)})
+        });
+
+        const d = await r.json();
+
+        // modal
+        document.getElementById("mButton").textContent = d.button;
+        document.getElementById("mSeq").textContent = d.seq;
+        document.getElementById("mDate").textContent = d.date;
+        document.getElementById("mTime").textContent = d.time;
+        modal.classList.remove("hidden");
+
+        // LOG (adiciona no topo)
+        const li = document.createElement("li");
+        li.textContent = `[${d.time}] Botão ${d.button} — Seq ${d.seq}`;
+        logList.prepend(li);
+      }
+
+      function closeModal() {
+        modal.classList.add("hidden");
+      }
+
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal();
       });
 
-      const d = await r.json();
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+      });
+    </script>
 
-      document.getElementById("mButton").textContent = d.button;
-      document.getElementById("mSeq").textContent = d.seq;
-      document.getElementById("mDate").textContent = d.date;
-      document.getElementById("mTime").textContent = d.time;
-
-      modal.classList.remove("hidden");
-    }
-
-    function closeModal() {
-      modal.classList.add("hidden");
-    }
-
-    // fechar clicando fora
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    // fechar com ESC
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
-    });
-  </script>
+  
 
 </body>
 </html>
