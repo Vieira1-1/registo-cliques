@@ -155,3 +155,35 @@ h1{
 @media (max-width: 520px){
   .buttons{ grid-template-columns: 1fr; }
 }
+/* LOG DE CLIQUES */
+.log{
+  margin-top: 22px;
+  width: min(860px, 100%);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  padding: 16px;
+  backdrop-filter: blur(6px);
+}
+
+.log h3{
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: var(--text);
+}
+
+#logList{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+#logList li{
+  padding: 6px 8px;
+  font-family: ui-monospace, monospace;
+  font-size: 14px;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
