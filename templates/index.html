@@ -7,9 +7,10 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+
   <main class="card">
     <h1>Registo de Cliques</h1>
-    <p class="sub">Clica num botão para registar o clique na base de dados.</p>
+    <p class="sub">Clica num botão para registar o clique.</p>
 
     <div class="buttons">
       <button class="btn" onclick="send(1)">Botão 1</button>
@@ -17,13 +18,21 @@
       <button class="btn" onclick="send(3)">Botão 3</button>
       <button class="btn" onclick="send(4)">Botão 4</button>
     </div>
-
-    <section class="result">
-      <h2>Último clique</h2>
-      <div id="out" class="output">Ainda não há cliques.</div>
-      <p class="hint">Dica: faz refresh e volta a clicar — o número continua no mesmo dia.</p>
-    </section>
   </main>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Registo do Clique</h2>
+
+      <p><strong>Botão:</strong> <span id="mButton"></span></p>
+      <p><strong>Número sequencial:</strong> <span id="mSeq"></span></p>
+      <p><strong>Data:</strong> <span id="mDate"></span></p>
+      <p><strong>Hora:</strong> <span id="mTime"></span></p>
+
+      <button class="close-btn" onclick="closeModal()">Fechar</button>
+    </div>
+  </div>
 
   <script>
     async function send(b) {
@@ -32,11 +41,25 @@
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({button: String(b)})
       });
+
       const d = await r.json();
 
-      document.getElementById("out").textContent =
-        `Seq: ${d.seq} | Data: ${d.date} | Hora: ${d.time} | Botão: ${d.button}`;
+      document.getElementById("mButton").textContent = d.button;
+      document.getElementById("mSeq").textContent = d.seq;
+      document.getElementById("mDate").textContent = d.date;
+      document.getElementById("mTime").textContent = d.time;
+
+      openModal();
+    }
+
+    function openModal() {
+      document.getElementById("modal").classList.remove("hidden");
+    }
+
+    function closeModal() {
+      document.getElementById("modal").classList.add("hidden");
     }
   </script>
+
 </body>
 </html>
