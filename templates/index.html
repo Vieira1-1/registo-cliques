@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Registo de Cliques</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <h1>Registo de Cliques</h1>
+  <main class="card">
+    <h1>Registo de Cliques</h1>
+    <p class="sub">Clica num botão para registar o clique na base de dados.</p>
 
-  <button onclick="send(1)">Botão 1</button>
-  <button onclick="send(2)">Botão 2</button>
-  <button onclick="send(3)">Botão 3</button>
-  <button onclick="send(4)">Botão 4</button>
+    <div class="buttons">
+      <button class="btn" onclick="send(1)">Botão 1</button>
+      <button class="btn" onclick="send(2)">Botão 2</button>
+      <button class="btn" onclick="send(3)">Botão 3</button>
+      <button class="btn" onclick="send(4)">Botão 4</button>
+    </div>
 
-  <p id="out"></p>
+    <section class="result">
+      <h2>Último clique</h2>
+      <div id="out" class="output">Ainda não há cliques.</div>
+      <p class="hint">Dica: faz refresh e volta a clicar — o número continua no mesmo dia.</p>
+    </section>
+  </main>
 
   <script>
     async function send(b) {
@@ -23,8 +33,9 @@
         body: JSON.stringify({button: String(b)})
       });
       const d = await r.json();
-      document.getElementById("out").innerText =
-        `Seq: ${d.seq} | Data: ${d.date} | Hora: ${d.time}`;
+
+      document.getElementById("out").textContent =
+        `Seq: ${d.seq} | Data: ${d.date} | Hora: ${d.time} | Botão: ${d.button}`;
     }
   </script>
 </body>
