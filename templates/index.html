@@ -13,10 +13,10 @@
     <p class="sub">Clica num botão para registar o clique.</p>
 
     <div class="buttons">
-      <button class="btn" onclick="send(1)">Botão 1</button>
-      <button class="btn" onclick="send(2)">Botão 2</button>
-      <button class="btn" onclick="send(3)">Botão 3</button>
-      <button class="btn" onclick="send(4)">Botão 4</button>
+      <button class="btn b1" onclick="send(1)">Botão 1</button>
+      <button class="btn b2" onclick="send(2)">Botão 2</button>
+      <button class="btn b3" onclick="send(3)">Botão 3</button>
+      <button class="btn b4" onclick="send(4)">Botão 4</button>
     </div>
   </main>
 
@@ -35,30 +35,45 @@
   </div>
 
   <script>
-    async function send(b) {
-      const r = await fetch("/api/click", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({button: String(b)})
-      });
+   <script>
+  const modal = document.getElementById("modal");
 
-      const d = await r.json();
+  async function send(b) {
+    const r = await fetch("/api/click", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({button: String(b)})
+    });
 
-      document.getElementById("mButton").textContent = d.button;
-      document.getElementById("mSeq").textContent = d.seq;
-      document.getElementById("mDate").textContent = d.date;
-      document.getElementById("mTime").textContent = d.time;
+    const d = await r.json();
 
-      openModal();
-    }
+    document.getElementById("mButton").textContent = d.button;
+    document.getElementById("mSeq").textContent = d.seq;
+    document.getElementById("mDate").textContent = d.date;
+    document.getElementById("mTime").textContent = d.time;
 
-    function openModal() {
-      document.getElementById("modal").classList.remove("hidden");
-    }
+    openModal();
+  }
 
-    function closeModal() {
-      document.getElementById("modal").classList.add("hidden");
-    }
+  function openModal() {
+    modal.classList.remove("hidden");
+  }
+
+  function closeModal() {
+    modal.classList.add("hidden");
+  }
+
+  // fechar ao clicar fora da caixa
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // fechar com ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+  });
+</script>
+
   </script>
 
 </body>
