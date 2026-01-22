@@ -20,7 +20,7 @@
     </div>
   </main>
 
-  <!-- MODAL -->
+  <!-- MODAL (JANELA) -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <h2>Registo do Clique</h2>
@@ -35,45 +35,42 @@
   </div>
 
   <script>
-   <script>
-  const modal = document.getElementById("modal");
+    const modal = document.getElementById("modal");
 
-  async function send(b) {
-    const r = await fetch("/api/click", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({button: String(b)})
+    async function send(b) {
+      const r = await fetch("/api/click", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({button: String(b)})
+      });
+
+      const d = await r.json();
+
+      document.getElementById("mButton").textContent = d.button;
+      document.getElementById("mSeq").textContent = d.seq;
+      document.getElementById("mDate").textContent = d.date;
+      document.getElementById("mTime").textContent = d.time;
+
+      openModal();
+    }
+
+    function openModal() {
+      modal.classList.remove("hidden");
+    }
+
+    function closeModal() {
+      modal.classList.add("hidden");
+    }
+
+    // fechar ao clicar fora
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
     });
 
-    const d = await r.json();
-
-    document.getElementById("mButton").textContent = d.button;
-    document.getElementById("mSeq").textContent = d.seq;
-    document.getElementById("mDate").textContent = d.date;
-    document.getElementById("mTime").textContent = d.time;
-
-    openModal();
-  }
-
-  function openModal() {
-    modal.classList.remove("hidden");
-  }
-
-  function closeModal() {
-    modal.classList.add("hidden");
-  }
-
-  // fechar ao clicar fora da caixa
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeModal();
-  });
-
-  // fechar com ESC
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
-  });
-</script>
-
+    // fechar com ESC
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+    });
   </script>
 
 </body>
