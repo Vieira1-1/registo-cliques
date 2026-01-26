@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 import sqlite3
 from datetime import datetime
 
@@ -17,9 +17,9 @@ def init_db():
         CREATE TABLE IF NOT EXISTS clicks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             button TEXT NOT NULL,
-            seq INTEGER NOT NULL,
-            date TEXT NOT NULL,
-            time TEXT NOT NULL
+            click_num INTEGER NOT NULL,
+            date TEXT NOT NULL,   -- YYYY-MM-DD
+            time TEXT NOT NULL    -- HH:MM
         )
     """)
     conn.commit()
@@ -34,6 +34,9 @@ def register_click():
     data = request.get_json(force=True)
     button = data.get("button")
 
+    if button not in ["1", "2", "3", "4"]:
+        return jsonify({"error": "Botão inválido"}), 400
+
     now = datetime.now()
     today = now.strftime("%Y-%m-%d")
     time_hm = now.strftime("%H:%M")
@@ -41,25 +44,53 @@ def register_click():
     conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("SELECT MAX(seq) FROM clicks WHERE date = ?", (today,))
-    last = cur.fetchone()[0]
-    seq = (last or 0) + 1
+    # ÚLTIMO click_num DO DIA PARA ESTE BOTÃO
+    cur.execute(
+        "SELECT MAX(click_num) AS max_click FROM clicks WHERE date = ? AND button = ?",
+        (today, button)
+    )
+    row = cur.fetchone()
+    last_click = row["max_click"] if row and row["max_click"] is not None else 0
+    click_num = last_click + 1
 
     cur.execute(
-        "INSERT INTO clicks (button, seq, date, time) VALUES (?, ?, ?, ?)",
-        (button, seq, today, time_hm)
+        "INSERT INTO clicks (button, click_num, date, time) VALUES (?, ?, ?, ?)",
+        (button, click_num, today, time_hm)
     )
     conn.commit()
     conn.close()
 
     return jsonify({
         "button": button,
-        "seq": seq,
+        "click_num": click_num,
         "date": today,
         "time": time_hm
     })
 
+@app.route("/api/export.csv")
+def export_csv():
+    """
+    Exporta tudo para CSV (Excel abre direto).
+    Colunas: id,button,click_num,date,time
+    """
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT id, button, click_num, date, time FROM clicks ORDER BY id ASC")
+    rows = cur.fetchall()
+    conn.close()
+
+    lines = ["id,button,click_num,date,time"]
+    for r in rows:
+        lines.append(f'{r["id"]},{r["button"]},{r["click_num"]},{r["date"]},{r["time"]}')
+    csv_data = "\n".join(lines)
+
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=clicks.csv"}
+    )
+
 init_db()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
