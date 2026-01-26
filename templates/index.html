@@ -9,13 +9,16 @@
 <body>
 
   <main class="card">
-    <h1>Registo de Cliques</h1>
-    <p class="sub">Clica num botão para registar o clique.</p>
-    <section class="log">
-      <h3>Log de Cliques (sessão atual)</h3>
-      <ul id="logList"></ul>
-    </section>
+    <div class="header">
+      <div>
+        <h1>Registo de Cliques</h1>
+        <p class="sub">Cada botão tem o seu contador diário (Clique nº X) e reinicia a cada novo dia.</p>
+      </div>
 
+      <a class="export" href="/api/export.csv" title="Exportar CSV para Excel">
+        ⬇️ Exportar CSV
+      </a>
+    </div>
 
     <div class="buttons">
       <button class="btn b1" onclick="send(1)">Botão 1</button>
@@ -23,15 +26,21 @@
       <button class="btn b3" onclick="send(3)">Botão 3</button>
       <button class="btn b4" onclick="send(4)">Botão 4</button>
     </div>
+
+    <section class="log">
+      <h3>Log de Cliques (sessão atual)</h3>
+      <ul id="logList"></ul>
+      <p class="hint">O log é da sessão do navegador. Os dados reais ficam guardados na base de dados.</p>
+    </section>
   </main>
 
-  <!-- JANELA / MODAL -->
+  <!-- MODAL -->
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <h2>Registo do Clique</h2>
 
       <p><strong>Botão:</strong> <span id="mButton"></span></p>
-      <p><strong>Número sequencial:</strong> <span id="mSeq"></span></p>
+      <p><strong>Clique nº (deste botão, hoje):</strong> <span id="mClick"></span></p>
       <p><strong>Data:</strong> <span id="mDate"></span></p>
       <p><strong>Hora:</strong> <span id="mTime"></span></p>
 
@@ -39,47 +48,50 @@
     </div>
   </div>
 
+  <script>
+    const modal = document.getElementById("modal");
+    const logList = document.getElementById("logList");
 
-    <script>
-      const modal = document.getElementById("modal");
-      const logList = document.getElementById("logList");
-
-      async function send(b) {
-        const r = await fetch("/api/click", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({button: String(b)})
-        });
-
-        const d = await r.json();
-
-        // modal
-        document.getElementById("mButton").textContent = d.button;
-        document.getElementById("mSeq").textContent = d.seq;
-        document.getElementById("mDate").textContent = d.date;
-        document.getElementById("mTime").textContent = d.time;
-        modal.classList.remove("hidden");
-
-        // LOG (adiciona no topo)
-        const li = document.createElement("li");
-        li.textContent = `[${d.time}] Botão ${d.button} — Seq ${d.seq}`;
-        logList.prepend(li);
-      }
-
-      function closeModal() {
-        modal.classList.add("hidden");
-      }
-
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) closeModal();
+    async function send(b) {
+      const r = await fetch("/api/click", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({button: String(b)})
       });
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
-      });
-    </script>
+      const d = await r.json();
+      if (!r.ok) {
+        alert(d.error || "Erro ao registar");
+        return;
+      }
 
-  
+      // modal
+      document.getElementById("mButton").textContent = `Botão ${d.button}`;
+      document.getElementById("mClick").textContent = d.click_num;
+      document.getElementById("mDate").textContent = d.date;
+      document.getElementById("mTime").textContent = d.time;
+      modal.classList.remove("hidden");
+
+      // log (no topo)
+      const li = document.createElement("li");
+      li.textContent = `[${d.time}] Botão ${d.button} — Clique nº ${d.click_num}`;
+      logList.prepend(li);
+    }
+
+    function closeModal() {
+      modal.classList.add("hidden");
+    }
+
+    // fechar clicando fora
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // fechar com ESC
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+    });
+  </script>
 
 </body>
 </html>
