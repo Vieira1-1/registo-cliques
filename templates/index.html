@@ -8,34 +8,23 @@
 </head>
 <body>
 
-  <main class="card full">
+  <main class="card big-card">
     <h1>Biblioteca</h1>
-    <p class="sub">Seleciona a atividade para registar a entrada</p>
+    <p class="sub">Seleciona a atividade</p>
 
-    <div class="buttons buttons-huge">
-      <button class="btn b1 huge" onclick="send(1)">📚 Estudo</button>
-      <button class="btn b2 huge" onclick="send(2)">♟️ Xadrez</button>
-      <button class="btn b3 huge" onclick="send(3)">📖 Leitura</button>
-      <button class="btn b4 huge" onclick="send(4)">💻 Computadores</button>
+    <div class="buttons buttons-giant">
+      <button class="btn b1" onclick="send(1)">📚 Estudo</button>
+      <button class="btn b2" onclick="send(2)">♟️ Xadrez</button>
+      <button class="btn b3" onclick="send(3)">📖 Leitura</button>
+      <button class="btn b4" onclick="send(4)">💻 Computadores</button>
     </div>
   </main>
 
-  <!-- POP-UP -->
-  <div id="popup" class="popup hidden">
-    <div class="popup-box">
-      <h2>Registo efetuado</h2>
-
-      <p><strong>Atividade:</strong> <span id="pActivity"></span></p>
-      <p><strong>Clique nº:</strong> <span id="pSeq"></span></p>
-      <p><strong>Data:</strong> <span id="pDate"></span></p>
-      <p><strong>Hora:</strong> <span id="pTime"></span></p>
-
-      <button class="close-btn" onclick="closePopup()">OK</button>
-    </div>
-  </div>
+  <!-- POP-UP PEQUENO (TOAST) -->
+  <div id="toast" class="toast hidden"></div>
 
   <script>
-    const popup = document.getElementById("popup");
+    const toast = document.getElementById("toast");
 
     async function send(b) {
       const r = await fetch("/api/click", {
@@ -46,25 +35,24 @@
 
       const d = await r.json();
       if (!r.ok) {
-        alert("Erro ao registar");
+        showToast("Erro ao registar");
         return;
       }
 
-      document.getElementById("pActivity").textContent = d.activity;
-      document.getElementById("pSeq").textContent = d.seq;
-      document.getElementById("pDate").textContent = d.date;
-      document.getElementById("pTime").textContent = d.time;
-
-      popup.classList.remove("hidden");
+      showToast(`${d.activity} registado — Clique nº ${d.seq} • ${d.date} ${d.time}`);
     }
 
-    function closePopup() {
-      popup.classList.add("hidden");
-    }
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.remove("hidden");
+      toast.classList.add("show");
 
-    popup.addEventListener("click", (e) => {
-      if (e.target === popup) closePopup();
-    });
+      clearTimeout(window.__t);
+      window.__t = setTimeout(() => {
+        toast.classList.remove("show");
+        toast.classList.add("hidden");
+      }, 2600);
+    }
   </script>
 
 </body>
