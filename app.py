@@ -9,7 +9,6 @@ app = Flask(__name__)
 os.makedirs(app.instance_path, exist_ok=True)
 DB_NAME = os.path.join(app.instance_path, "clicks.db")
 
-# Nomes das atividades (para export Excel e/ou UI)
 ACTIVITY_NAMES = {
     "1": "Estudo",
     "2": "Xadrez",
@@ -40,6 +39,64 @@ def init_db():
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/admin")
+def admin():
+    """Dashboard simples."""
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    # últimos 20 registos
+    cur.execute("SELECT id, button, seq, date, time FROM clicks ORDER BY id DESC LIMIT 20")
+    recent = cur.fetchall()
+
+    # total de hoje
+    cur.execute("SELECT COUNT(*) AS total FROM clicks WHERE date = ?", (today,))
+    total_today = cur.fetchone()["total"]
+
+    # totais de hoje por botão
+    cur.execute("""
+        SELECT button, COUNT(*) AS total
+        FROM clicks
+        WHERE date = ?
+        GROUP BY button
+        ORDER BY button ASC
+    """, (today,))
+    per_button_rows = cur.fetchall()
+
+    conn.close()
+
+    per_activity = []
+    for r in per_button_rows:
+        b = r["button"]
+        per_activity.append({
+            "button": b,
+            "activity": ACTIVITY_NAMES.get(b, f"Botão {b}"),
+            "total": r["total"]
+        })
+
+    # prepara recent com nomes
+    recent_prepared = []
+    for r in recent:
+        b = r["button"]
+        recent_prepared.append({
+            "id": r["id"],
+            "activity": ACTIVITY_NAMES.get(b, f"Botão {b}"),
+            "button": b,
+            "seq": r["seq"],
+            "date": r["date"],
+            "time": r["time"]
+        })
+
+    return render_template(
+        "admin.html",
+        today=today,
+        total_today=total_today,
+        per_activity=per_activity,
+        recent=recent_prepared
+    )
 
 @app.route("/api/click", methods=["POST"])
 def register_click():
@@ -72,7 +129,6 @@ def register_click():
     conn.commit()
     conn.close()
 
-    # devolve também o nome (podes usar no front-end se quiseres)
     return jsonify({
         "button": button,
         "activity": ACTIVITY_NAMES.get(button, f"Botão {button}"),
@@ -90,14 +146,10 @@ def export_csv():
     conn.close()
 
     # CSV organizado para Excel PT (separador ;)
-    # colunas com nomes "humanos"
     lines = ["id;atividade;botao;clique;data;hora"]
-
     for r in rows:
         button = r["button"]
         activity = ACTIVITY_NAMES.get(button, f"Botão {button}")
-
-        # id;atividade;botao;clique;data;hora
         lines.append(f'{r["id"]};{activity};{button};{r["seq"]};{r["date"]};{r["time"]}')
 
     csv_data = "\n".join(lines)
