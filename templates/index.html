@@ -3,115 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Biblioteca — Registo de Atividades</title>
+  <title>Biblioteca — Registo</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-  <main class="card">
-    <div class="header">
-      <div>
-        <h1>Biblioteca — Registo de Entradas</h1>
-        <p class="sub">
-          Aplicação simples para registar entradas/atividades na biblioteca.
-          Cada botão representa uma atividade e guarda data, hora e um contador diário independente por botão.
-        </p>
-      </div>
+  <main class="card full">
+    <h1>Biblioteca</h1>
+    <p class="sub">Seleciona a atividade para registar a entrada</p>
 
-      <div class="header-actions">
-        <a class="export" href="/api/export.csv" title="Exportar para Excel">⬇️ Exportar CSV</a>
-        <button class="help-btn" id="toggleHelp" type="button">📘 Manual</button>
-      </div>
+    <div class="buttons buttons-huge">
+      <button class="btn b1 huge" onclick="send(1)">📚 Estudo</button>
+      <button class="btn b2 huge" onclick="send(2)">♟️ Xadrez</button>
+      <button class="btn b3 huge" onclick="send(3)">📖 Leitura</button>
+      <button class="btn b4 huge" onclick="send(4)">💻 Computadores</button>
     </div>
-
-    <div class="buttons">
-      <button class="btn b1" onclick="send(1)">📚 Estudo</button>
-      <button class="btn b2" onclick="send(2)">♟️ Xadrez</button>
-      <button class="btn b3" onclick="send(3)">📖 Leitura</button>
-      <button class="btn b4" onclick="send(4)">💻 Computadores</button>
-    </div>
-
-    <!-- Manual de Utilizador (simples) -->
-    <section class="manual hidden" id="manual">
-      <h2>Manual de Utilizador</h2>
-
-      <div class="manual-block">
-        <h3>Objetivo</h3>
-        <p>
-          Registar atividades realizadas na biblioteca através de 4 botões.
-          Cada clique fica guardado numa base de dados com <strong>data</strong>, <strong>hora</strong> e
-          <strong>clique nº</strong> (contador diário por botão).
-        </p>
-      </div>
-
-      <div class="manual-block">
-        <h3>Como usar</h3>
-        <ol>
-          <li>Escolhe a atividade (Estudo, Xadrez, Leitura ou Computadores).</li>
-          <li>Clica no botão correspondente.</li>
-          <li>Surge uma janela com os dados do registo (atividade, clique nº, data e hora).</li>
-          <li>Clica em <strong>Fechar</strong> para voltar ao ecrã principal.</li>
-          <li>O <strong>Log</strong> em baixo mostra os cliques feitos nesta sessão.</li>
-        </ol>
-      </div>
-
-      <div class="manual-block">
-        <h3>Exportar dados para análise</h3>
-        <p>
-          Para analisar os dados no Excel, clica em <strong>Exportar CSV</strong>.
-          O ficheiro contém as colunas: <strong>id</strong>, <strong>button</strong>, <strong>seq</strong>, <strong>date</strong>, <strong>time</strong>.
-        </p>
-      </div>
-
-      <div class="manual-block">
-        <h3>Notas</h3>
-        <ul>
-          <li>O contador reinicia automaticamente a cada novo dia.</li>
-          <li>O contador é independente por botão (cada atividade tem o seu próprio clique nº diário).</li>
-          <li>Mesmo que atualizes a página, os registos mantêm-se na base de dados.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="log">
-      <h3>Log (sessão atual)</h3>
-      <ul id="logList"></ul>
-      <p class="hint">O log é apenas desta sessão. Os dados oficiais ficam guardados na base de dados.</p>
-    </section>
   </main>
 
-  <!-- MODAL -->
-  <div id="modal" class="modal hidden">
-    <div class="modal-content">
+  <!-- POP-UP -->
+  <div id="popup" class="popup hidden">
+    <div class="popup-box">
       <h2>Registo efetuado</h2>
 
-      <p><strong>Atividade:</strong> <span id="mActivity"></span></p>
-      <p><strong>Clique nº (desta atividade, hoje):</strong> <span id="mSeq"></span></p>
-      <p><strong>Data:</strong> <span id="mDate"></span></p>
-      <p><strong>Hora:</strong> <span id="mTime"></span></p>
+      <p><strong>Atividade:</strong> <span id="pActivity"></span></p>
+      <p><strong>Clique nº:</strong> <span id="pSeq"></span></p>
+      <p><strong>Data:</strong> <span id="pDate"></span></p>
+      <p><strong>Hora:</strong> <span id="pTime"></span></p>
 
-      <button class="close-btn" onclick="closeModal()">Fechar</button>
+      <button class="close-btn" onclick="closePopup()">OK</button>
     </div>
   </div>
 
   <script>
-    const modal = document.getElementById("modal");
-    const logList = document.getElementById("logList");
-
-    const manual = document.getElementById("manual");
-    const toggleHelp = document.getElementById("toggleHelp");
-
-    const activityNames = {
-      "1": "Estudo",
-      "2": "Xadrez",
-      "3": "Leitura",
-      "4": "Computadores"
-    };
-
-    toggleHelp.addEventListener("click", () => {
-      manual.classList.toggle("hidden");
-      toggleHelp.textContent = manual.classList.contains("hidden") ? "📘 Manual" : "✖ Fechar Manual";
-    });
+    const popup = document.getElementById("popup");
 
     async function send(b) {
       const r = await fetch("/api/click", {
@@ -122,35 +46,24 @@
 
       const d = await r.json();
       if (!r.ok) {
-        alert(d.error || "Erro ao registar");
+        alert("Erro ao registar");
         return;
       }
 
-      const activity = activityNames[d.button] || `Atividade ${d.button}`;
+      document.getElementById("pActivity").textContent = d.activity;
+      document.getElementById("pSeq").textContent = d.seq;
+      document.getElementById("pDate").textContent = d.date;
+      document.getElementById("pTime").textContent = d.time;
 
-      // Modal
-      document.getElementById("mActivity").textContent = activity;
-      document.getElementById("mSeq").textContent = d.seq;
-      document.getElementById("mDate").textContent = d.date;
-      document.getElementById("mTime").textContent = d.time;
-      modal.classList.remove("hidden");
-
-      // Log
-      const li = document.createElement("li");
-      li.textContent = `[${d.time}] ${activity} — Clique nº ${d.seq}`;
-      logList.prepend(li);
+      popup.classList.remove("hidden");
     }
 
-    function closeModal() {
-      modal.classList.add("hidden");
+    function closePopup() {
+      popup.classList.add("hidden");
     }
 
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) closePopup();
     });
   </script>
 
