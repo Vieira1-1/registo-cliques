@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <main class="card">
+    <div class="header">
+      <div>
+        <h1>Admin — Dashboard</h1>
+        <p class="sub">Resumo e últimos registos do sistema.</p>
+      </div>
+
+      <div class="header-actions">
+        <a class="export" href="/api/export.csv">⬇️ Exportar CSV</a>
+        <a class="export" href="/">↩️ Voltar ao site</a>
+      </div>
+    </div>
+
+    <section class="manual">
+      <h2>Resumo de hoje ({{ today }})</h2>
+
+      <div class="manual-block">
+        <p><strong>Total de registos hoje:</strong> {{ total_today }}</p>
+      </div>
+
+      <div class="manual-block">
+        <h3>Registos por atividade (hoje)</h3>
+        {% if per_activity|length == 0 %}
+          <p style="color: rgba(232,238,252,0.72);">Ainda não há registos hoje.</p>
+        {% else %}
+          <ul>
+            {% for item in per_activity %}
+              <li style="color: rgba(232,238,252,0.72);">
+                <strong>{{ item.activity }}</strong>: {{ item.total }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="log">
+      <h3>Últimos 20 registos</h3>
+
+      {% if recent|length == 0 %}
+        <p class="hint">Ainda não há registos.</p>
+      {% else %}
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(255,255,255,0.12);">ID</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(255,255,255,0.12);">Atividade</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(255,255,255,0.12);">Clique nº</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(255,255,255,0.12);">Data</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid rgba(255,255,255,0.12);">Hora</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in recent %}
+              <tr>
+                <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.06); color: rgba(232,238,252,0.72);">{{ r.id }}</td>
+                <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.06); color: rgba(232,238,252,0.72);">{{ r.activity }}</td>
+                <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.06); color: rgba(232,238,252,0.72);">{{ r.seq }}</td>
+                <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.06); color: rgba(232,238,252,0.72);">{{ r.date }}</td>
+                <td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.06); color: rgba(232,238,252,0.72);">{{ r.time }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </section>
+
+    <p class="hint">Dica: Atualiza esta página para ver novos registos.</p>
+  </main>
+
+</body>
+</html>
