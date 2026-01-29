@@ -8,12 +8,31 @@
 </head>
 <body>
 
-  <main class="card big-card">
-    <div class="top-right">
-      <a class="action-btn" href="/admin">🔐 Admin</a>
+  <!-- BOTÃO ☰ -->
+  <button class="menu-btn" id="menuBtn" aria-label="Abrir menu">☰</button>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar hidden" id="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-title">Menu</div>
+      <button class="sidebar-close" id="closeSidebar" aria-label="Fechar menu">✕</button>
     </div>
 
-    <h1>Biblioteca</h1>
+    <nav class="sidebar-links">
+      <a class="sidebar-link" href="/">🏠 Página principal</a>
+      <a class="sidebar-link" href="/admin">🔐 Administração</a>
+      <a class="sidebar-link" href="/api/export.csv">⬇️ Exportar CSV (Excel)</a>
+      <a class="sidebar-link" href="/api/export.json">⬇️ Exportar JSON</a>
+    </nav>
+
+  </aside>
+
+  <!-- OVERLAY -->
+  <div class="overlay hidden" id="overlay"></div>
+
+  <!-- CONTEÚDO -->
+  <main class="card big-card">
+    <h1>Registo de Atividades da Biblioteca</h1>
     <p class="sub">Seleciona a atividade</p>
 
     <div class="buttons-giant">
@@ -24,10 +43,22 @@
     </div>
   </main>
 
+  <!-- TOAST -->
   <div id="toast" class="toast hidden"></div>
 
   <script>
+    // Toast
     const toast = document.getElementById("toast");
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.remove("hidden");
+      toast.classList.add("show");
+      clearTimeout(window.__t);
+      window.__t = setTimeout(() => {
+        toast.classList.remove("show");
+        toast.classList.add("hidden");
+      }, 2600);
+    }
 
     async function send(b) {
       const r = await fetch("/api/click", {
@@ -37,25 +68,36 @@
       });
 
       const d = await r.json();
-      if (!r.ok) {
-        showToast("Erro ao registar");
-        return;
-      }
+      if (!r.ok) return showToast("Erro ao registar");
 
       showToast(`${d.activity} registado — Clique nº ${d.seq} • ${d.date} ${d.time}`);
     }
 
-    function showToast(text) {
-      toast.textContent = text;
-      toast.classList.remove("hidden");
-      toast.classList.add("show");
+    // Sidebar
+    const menuBtn = document.getElementById("menuBtn");
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    const closeSidebarBtn = document.getElementById("closeSidebar");
 
-      clearTimeout(window.__t);
-      window.__t = setTimeout(() => {
-        toast.classList.remove("show");
-        toast.classList.add("hidden");
-      }, 2600);
+    function openSidebar(){
+      sidebar.classList.remove("hidden");
+      overlay.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
     }
+
+    function closeSidebar(){
+      sidebar.classList.add("hidden");
+      overlay.classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    menuBtn.addEventListener("click", openSidebar);
+    closeSidebarBtn.addEventListener("click", closeSidebar);
+    overlay.addEventListener("click", closeSidebar);
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !sidebar.classList.contains("hidden")) closeSidebar();
+    });
   </script>
 
 </body>
