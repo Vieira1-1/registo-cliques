@@ -42,7 +42,6 @@ def index():
 
 @app.route("/admin")
 def admin():
-    """Dashboard simples."""
     today = datetime.now().strftime("%Y-%m-%d")
 
     conn = get_db()
@@ -50,7 +49,7 @@ def admin():
 
     # últimos 20 registos
     cur.execute("SELECT id, button, seq, date, time FROM clicks ORDER BY id DESC LIMIT 20")
-    recent = cur.fetchall()
+    recent_rows = cur.fetchall()
 
     # total de hoje
     cur.execute("SELECT COUNT(*) AS total FROM clicks WHERE date = ?", (today,))
@@ -77,11 +76,10 @@ def admin():
             "total": r["total"]
         })
 
-    # prepara recent com nomes
-    recent_prepared = []
-    for r in recent:
+    recent = []
+    for r in recent_rows:
         b = r["button"]
-        recent_prepared.append({
+        recent.append({
             "id": r["id"],
             "activity": ACTIVITY_NAMES.get(b, f"Botão {b}"),
             "button": b,
@@ -95,7 +93,7 @@ def admin():
         today=today,
         total_today=total_today,
         per_activity=per_activity,
-        recent=recent_prepared
+        recent=recent
     )
 
 @app.route("/api/click", methods=["POST"])
@@ -137,6 +135,7 @@ def register_click():
         "time": time_hm
     })
 
+# ---------- EXPORT CSV (Excel) ----------
 @app.route("/api/export.csv")
 def export_csv():
     conn = get_db()
@@ -148,9 +147,9 @@ def export_csv():
     # CSV organizado para Excel PT (separador ;)
     lines = ["id;atividade;botao;clique;data;hora"]
     for r in rows:
-        button = r["button"]
-        activity = ACTIVITY_NAMES.get(button, f"Botão {button}")
-        lines.append(f'{r["id"]};{activity};{button};{r["seq"]};{r["date"]};{r["time"]}')
+        b = r["button"]
+        activity = ACTIVITY_NAMES.get(b, f"Botão {b}")
+        lines.append(f'{r["id"]};{activity};{b};{r["seq"]};{r["date"]};{r["time"]}')
 
     csv_data = "\n".join(lines)
 
@@ -159,6 +158,78 @@ def export_csv():
         mimetype="text/csv; charset=utf-8",
         headers={"Content-Disposition": "attachment; filename=registos_biblioteca.csv"}
     )
+
+# ---------- EXPORT JSON ----------
+@app.route("/api/export.json")
+def export_json():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT id, button, seq, date, time FROM clicks ORDER BY id ASC")
+    rows = cur.fetchall()
+    conn.close()
+
+    data = []
+    for r in rows:
+        b = r["button"]
+        data.append({
+            "id": r["id"],
+            "activity": ACTIVITY_NAMES.get(b, f"Botão {b}"),
+            "button": b,
+            "click": r["seq"],
+            "date": r["date"],
+            "time": r["time"]
+        })
+
+    # Faz download como ficheiro JSON
+    json_text = jsonify(data).get_data(as_text=True)
+    return Response(
+        json_text,
+        mimetype="application/json; charset=utf-8",
+        headers={"Content-Disposition": "attachment; filename=registos_biblioteca.json"}
+    )
+
+# ---------- STATS PARA GRÁFICOS ----------
+@app.route("/api/stats/today")
+def stats_today():
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT button, COUNT(*) AS total
+        FROM clicks
+        WHERE date = ?
+        GROUP BY button
+        ORDER BY button ASC
+    """, (today,))
+    rows = cur.fetchall()
+    conn.close()
+
+    labels = []
+    values = []
+    for r in rows:
+        b = r["button"]
+        labels.append(ACTIVITY_NAMES.get(b, f"Botão {b}"))
+        values.append(r["total"])
+
+    return jsonify({"date": today, "labels": labels, "values": values})
+
+@app.route("/api/stats/last7days")
+def stats_last7days():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT date, COUNT(*) AS total
+        FROM clicks
+        WHERE date >= date('now','-6 day')
+        GROUP BY date
+        ORDER BY date ASC
+    """)
+    rows = cur.fetchall()
+    conn.close()
+
+    labels = [r["date"] for r in rows]
+    values = [r["total"] for r in rows]
+    return jsonify({"labels": labels, "values": values})
 
 init_db()
 
