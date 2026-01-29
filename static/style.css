@@ -60,9 +60,7 @@ h1{
   font-size: 16px;
 }
 
-/* =======================
-   INDEX: BOTÕES GRANDES
-   ======================= */
+/* INDEX */
 .big-card{
   text-align: center;
 }
@@ -104,9 +102,7 @@ h1{
 .b3{ background: linear-gradient(135deg, rgba(34,197,94,0.35), rgba(255,255,255,0.06)); }
 .b4{ background: linear-gradient(135deg, rgba(245,158,11,0.35), rgba(255,255,255,0.06)); }
 
-/* =======================
-   TOAST (popup pequeno)
-   ======================= */
+/* TOAST */
 .toast{
   position: fixed;
   left: 50%;
@@ -122,6 +118,7 @@ h1{
   transition: opacity 220ms ease, transform 220ms ease;
   max-width: min(900px, 92vw);
   text-align: center;
+  z-index: 200;
 }
 
 .toast.show{
@@ -131,9 +128,7 @@ h1{
 
 .hidden{ display: none; }
 
-/* =======================
-   ADMIN: TOP BAR BOTÕES
-   ======================= */
+/* ADMIN */
 .admin-top{
   display: flex;
   justify-content: space-between;
@@ -151,8 +146,8 @@ h1{
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  text-decoration: none;            /* ✅ tira underline */
-  color: var(--text);               /* ✅ tira azul/roxo */
+  text-decoration: none;
+  color: var(--text);
   border: 1px solid rgba(255,255,255,0.14);
   background: rgba(255,255,255,0.08);
   padding: 10px 12px;
@@ -172,9 +167,6 @@ h1{
   transform: scale(0.99);
 }
 
-/* =======================
-   ADMIN: GRID / BOXES
-   ======================= */
 .admin-grid{
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -242,9 +234,6 @@ h1{
   font-weight: 700;
 }
 
-/* =======================
-   ADMIN: TABLE
-   ======================= */
 .admin-table-box{
   margin-top: 14px;
 }
@@ -279,6 +268,119 @@ h1{
   color: rgba(232,238,252,0.55);
 }
 
+.chart-wrap{
+  width: 100%;
+  height: 260px;
+  padding: 10px 0 0 0;
+}
+
+.chart-wrap canvas{
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* MENU (hamburger + sidebar) */
+.menu-btn{
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 350;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 16px 30px rgba(0,0,0,0.35);
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.menu-btn:hover{
+  background: rgba(255,255,255,0.12);
+  transform: translateY(-1px);
+}
+
+.sidebar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: min(320px, 86vw);
+  z-index: 360;
+  background: rgba(15,23,42,0.92);
+  border-right: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+  padding: 14px;
+  animation: slideIn 160ms ease both;
+}
+
+@keyframes slideIn{
+  from { transform: translateX(-10px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.sidebar-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 6px 12px 6px;
+}
+
+.sidebar-title{
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+
+.sidebar-close{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.sidebar-links{
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.sidebar-link{
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  padding: 12px 12px;
+  border-radius: 14px;
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.sidebar-link:hover{
+  background: rgba(255,255,255,0.10);
+  transform: translateY(-1px);
+}
+
+.sidebar-note{
+  margin: 14px 6px 0 6px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 355;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(2px);
+}
+
 /* RESPONSIVO */
 @media (max-width: 720px){
   .buttons-giant{
@@ -296,68 +398,3 @@ h1{
     grid-template-columns: 1fr;
   }
 }
-/* Botão Admin no canto */
-.top-right{
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 8px;
-}
-
-/* Área do gráfico */
-.chart-wrap{
-  width: 100%;
-  padding: 10px 0 0 0;
-}
-/* =======================
-   FIX: Links nunca azuis/roxos
-   ======================= */
-a, a:link, a:visited{
-  color: inherit;
-}
-
-/* =======================
-   Admin: botões do topo sempre certinhos
-   (caso algo esteja a sobrepor)
-   ======================= */
-.admin-actions a{
-  text-decoration: none !important;
-  color: var(--text) !important;
-}
-
-/* =======================
-   Gráficos: altura fixa para não ficarem minúsculos
-   ======================= */
-.chart-wrap{
-  width: 100%;
-  height: 260px;          /* <-- importante */
-  padding-top: 10px;
-}
-
-.chart-wrap canvas{
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* =======================
-   Tabela: mais "clean" e legível
-   ======================= */
-.admin-table{
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.admin-table tbody tr:hover{
-  background: rgba(255,255,255,0.04);
-}
-
-/* =======================
-   Top-right no index: fica melhor em mobile
-   ======================= */
-@media (max-width: 720px){
-  .top-right{
-    justify-content: center;
-    margin-bottom: 12px;
-  }
-}
-
