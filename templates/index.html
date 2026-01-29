@@ -23,14 +23,14 @@
       <a class="sidebar-link" href="/admin">🔐 Administração</a>
       <a class="sidebar-link" href="/api/export.csv">⬇️ Exportar CSV (Excel)</a>
       <a class="sidebar-link" href="/api/export.json">⬇️ Exportar JSON</a>
+      <a class="sidebar-link" href="#manual">📘 Manual de Utilização</a>
     </nav>
-
   </aside>
 
   <!-- OVERLAY -->
   <div class="overlay hidden" id="overlay"></div>
 
-  <!-- CONTEÚDO -->
+  <!-- CONTEÚDO PRINCIPAL -->
   <main class="card big-card">
     <h1>Registo de Atividades da Biblioteca</h1>
     <p class="sub">Seleciona a atividade</p>
@@ -43,11 +43,25 @@
     </div>
   </main>
 
+  <!-- MANUAL DE UTILIZAÇÃO -->
+  <section id="manual" class="card" style="margin-top:40px">
+    <h1>Manual de Utilização</h1>
+    <p class="sub">Instruções rápidas para utilização do sistema</p>
+
+    <ol style="text-align:left; max-width:900px; margin:20px auto; color:var(--muted)">
+      <li>Seleciona a atividade que vais realizar na biblioteca.</li>
+      <li>Ao clicar num botão, o registo é guardado automaticamente.</li>
+      <li>É apresentado um aviso com a data, hora e número do clique.</li>
+      <li>Os dados ficam armazenados numa base de dados.</li>
+      <li>A área de administração permite visualizar estatísticas e exportar os registos.</li>
+    </ol>
+  </section>
+
   <!-- TOAST -->
   <div id="toast" class="toast hidden"></div>
 
   <script>
-    // Toast
+    /* ========= TOAST ========= */
     const toast = document.getElementById("toast");
     function showToast(text) {
       toast.textContent = text;
@@ -73,7 +87,7 @@
       showToast(`${d.activity} registado — Clique nº ${d.seq} • ${d.date} ${d.time}`);
     }
 
-    // Sidebar
+    /* ========= SIDEBAR ========= */
     const menuBtn = document.getElementById("menuBtn");
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("overlay");
@@ -97,6 +111,11 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && !sidebar.classList.contains("hidden")) closeSidebar();
+    });
+
+    /* Fecha o menu ao clicar num link */
+    document.querySelectorAll(".sidebar-link").forEach(link => {
+      link.addEventListener("click", closeSidebar);
     });
   </script>
 
