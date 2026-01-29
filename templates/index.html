@@ -9,10 +9,14 @@
 <body>
 
   <main class="card big-card">
+    <div class="top-right">
+      <a class="action-btn" href="/admin">🔐 Admin</a>
+    </div>
+
     <h1>Biblioteca</h1>
     <p class="sub">Seleciona a atividade</p>
 
-    <div class="buttons buttons-giant">
+    <div class="buttons-giant">
       <button class="btn b1" onclick="send(1)">📚 Estudo</button>
       <button class="btn b2" onclick="send(2)">♟️ Xadrez</button>
       <button class="btn b3" onclick="send(3)">📖 Leitura</button>
@@ -20,7 +24,6 @@
     </div>
   </main>
 
-  <!-- POP-UP PEQUENO (TOAST) -->
   <div id="toast" class="toast hidden"></div>
 
   <script>
