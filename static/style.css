@@ -296,3 +296,68 @@ h1{
     grid-template-columns: 1fr;
   }
 }
+/* Botão Admin no canto */
+.top-right{
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+/* Área do gráfico */
+.chart-wrap{
+  width: 100%;
+  padding: 10px 0 0 0;
+}
+/* =======================
+   FIX: Links nunca azuis/roxos
+   ======================= */
+a, a:link, a:visited{
+  color: inherit;
+}
+
+/* =======================
+   Admin: botões do topo sempre certinhos
+   (caso algo esteja a sobrepor)
+   ======================= */
+.admin-actions a{
+  text-decoration: none !important;
+  color: var(--text) !important;
+}
+
+/* =======================
+   Gráficos: altura fixa para não ficarem minúsculos
+   ======================= */
+.chart-wrap{
+  width: 100%;
+  height: 260px;          /* <-- importante */
+  padding-top: 10px;
+}
+
+.chart-wrap canvas{
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* =======================
+   Tabela: mais "clean" e legível
+   ======================= */
+.admin-table{
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.admin-table tbody tr:hover{
+  background: rgba(255,255,255,0.04);
+}
+
+/* =======================
+   Top-right no index: fica melhor em mobile
+   ======================= */
+@media (max-width: 720px){
+  .top-right{
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+}
+
