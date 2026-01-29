@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin — Dashboard</title>
   <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -12,11 +13,12 @@
     <div class="admin-top">
       <div>
         <h1>Admin</h1>
-        <p class="sub">Resumo e últimos registos</p>
+        <p class="sub">Resumo, últimos registos e gráficos</p>
       </div>
 
       <div class="admin-actions">
-        <a class="action-btn" href="/api/export.csv">⬇️ Exportar CSV</a>
+        <a class="action-btn" href="/api/export.csv">⬇️ Exportar CSV (Excel)</a>
+        <a class="action-btn" href="/api/export.json">⬇️ Exportar JSON</a>
         <a class="action-btn" href="/">↩️ Voltar ao site</a>
       </div>
     </div>
@@ -39,12 +41,30 @@
           <ul class="admin-list">
             {% for item in per_activity %}
               <li>
-                <span class="tag"> {{ item.activity }} </span>
+                <span class="tag">{{ item.activity }}</span>
                 <span class="count">{{ item.total }}</span>
               </li>
             {% endfor %}
           </ul>
         {% endif %}
+      </div>
+    </section>
+
+    <section class="admin-grid">
+      <div class="admin-box">
+        <h2>Gráfico — Hoje por atividade</h2>
+        <div class="chart-wrap">
+          <canvas id="chartToday"></canvas>
+        </div>
+        <p class="hint">Mostra quantos registos houve hoje em cada atividade.</p>
+      </div>
+
+      <div class="admin-box">
+        <h2>Gráfico — Últimos 7 dias</h2>
+        <div class="chart-wrap">
+          <canvas id="chart7days"></canvas>
+        </div>
+        <p class="hint">Mostra o total de registos por dia.</p>
       </div>
     </section>
 
@@ -83,6 +103,56 @@
 
     <p class="hint">Atualiza a página para ver novos registos.</p>
   </main>
+
+  <script>
+    async function loadTodayChart() {
+      const res = await fetch("/api/stats/today");
+      const data = await res.json();
+
+      const ctx = document.getElementById("chartToday");
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: "Registos hoje",
+            data: data.values
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    async function load7DaysChart() {
+      const res = await fetch("/api/stats/last7days");
+      const data = await res.json();
+
+      const ctx = document.getElementById("chart7days");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: "Total por dia",
+            data: data.values,
+            tension: 0.25
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: true } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    loadTodayChart();
+    load7DaysChart();
+  </script>
 
 </body>
 </html>
